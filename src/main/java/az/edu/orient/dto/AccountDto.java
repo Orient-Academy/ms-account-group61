@@ -14,7 +14,7 @@ import java.util.Date;
 @Builder
 public class AccountDto implements Cloneable{
     private Integer id;
-    private Integer iban;
+    private String iban;
     @Enumerated(EnumType.STRING)
     private AccountTypeConstant accountType;
     private String accountNumber;
@@ -24,6 +24,7 @@ public class AccountDto implements Cloneable{
     private Date openingDate;
     private Date closingDate;
     private ActiveStatusConstant activeStatus;
+    private Long userId;
 
     @Override
     public AccountDto clone() {

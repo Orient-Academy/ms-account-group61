@@ -1,7 +1,10 @@
 package az.edu.orient.utility;
 
+import org.springframework.stereotype.Component;
+
 import java.math.BigInteger;
 
+@Component
 public class IbanUtil {
 
     public String generateIBAN(String countryCode, String bankCode, String accountNumber) {

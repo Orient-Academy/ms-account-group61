@@ -21,7 +21,7 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Integer iban;
+    private String iban;
     @Enumerated(EnumType.STRING)
     private AccountTypeConstant accountType;
     private String accountNumber;
@@ -30,6 +30,7 @@ public class Account {
     private Date openingDate;
     private Date closingDate;
     private byte activeStatus;
+    private Long userId;
 
     @Override
     public boolean equals(Object o) {
