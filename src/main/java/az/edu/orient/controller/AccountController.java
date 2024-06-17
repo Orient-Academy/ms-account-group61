@@ -83,7 +83,7 @@ public class AccountController {
         return new ResponseEntity<>("Deleted successfully!", HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/{id}/test", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteAccount2(@PathVariable Integer id) {
         System.out.println("Hello");
         return new ResponseEntity<>("Deleted successfully!", HttpStatus.OK);
