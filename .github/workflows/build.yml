@@ -22,6 +22,8 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
+      - name: Run tests with JaCoCo
+        run: ./gradlew test jacocoTestReport
 
       - name: JaCoCo Code Coverage Report
         id: jacoco_reporter
