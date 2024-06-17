@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.3.0'
 	id 'io.spring.dependency-management' version '1.1.5'
 	id("io.freefair.lombok") version "8.6"
+	id 'jacoco'
 }
 
 group = 'az.edu.orient'
@@ -10,6 +11,10 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	sourceCompatibility = '17'
+}
+
+jacoco {
+	toolVersion = "0.8.11"
 }
 
 configurations {
@@ -38,6 +43,15 @@ dependencies {
 	testImplementation group: 'org.instancio', name: 'instancio-junit', version: '4.5.0'
 }
 
-tasks.named('test') {
+test {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+	}
 }
