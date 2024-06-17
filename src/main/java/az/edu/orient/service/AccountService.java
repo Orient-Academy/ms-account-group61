@@ -13,17 +13,20 @@ import az.edu.orient.mapper.AccountMapper;
 import az.edu.orient.repository.AccountRepository;
 import az.edu.orient.utility.IbanUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class AccountService {
     private final AccountRepository accountRepository;
     private final IbanUtil ibanUtil;
+    private final RedisTemplate<Long, AccountDto> redisTemplate;
 
     public List<AccountDto> getAllAccounts(){
         return accountRepository.findAll()
@@ -32,9 +35,17 @@ public class AccountService {
                 .toList();
     }
 
-    public AccountDto getAccountById(int id) {
+    public AccountDto getAccountById(long id) {
+        AccountDto cacheAccountDto = redisTemplate.opsForValue().get(id);
+        if (cacheAccountDto != null) {
+            return cacheAccountDto;
+        }
+
         Account account = getById(id);
-        return AccountMapper.INSTANCE.mapAccount(account);
+        AccountDto result = AccountMapper.INSTANCE.mapAccount(account);
+
+        redisTemplate.opsForValue().set(id, result, 30, TimeUnit.MINUTES);
+        return result;
     }
 
     public List<AccountDto> getAccountsByAccountType(AccountTypeConstant accountType) {
@@ -70,10 +81,11 @@ public class AccountService {
             throw new NoChangeInUpdatedAccountException(ExceptionMessageConstant.NO_CHANGE_IN_UPDATED_ACCOUNT.getMessage());
         }
         Account savedAccount = accountRepository.save(updatedAccount);
+        redisTemplate.opsForValue().getAndDelete(Long.valueOf(accountDto.getId()));
         return AccountMapper.INSTANCE.mapAccount(savedAccount);
     }
 
-    public void deleteAccount(int id) {
+    public void deleteAccount(long id) {
         getById(id);
         accountRepository.deleteById(id);
     }
@@ -95,7 +107,7 @@ public class AccountService {
         return AccountMapper.INSTANCE.mapAccount(updatedAccount);
     }
 
-    private Account getById(Integer id) {
+    private Account getById(long id) {
         return accountRepository.findById(id)
                 .orElseThrow(() -> new AccountNotFoundException(ExceptionMessageConstant.ACCOUNT_NOT_FOUND_MESSAGE.getMessage()));
     }

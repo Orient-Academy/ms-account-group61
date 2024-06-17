@@ -20,7 +20,7 @@ import java.util.Objects;
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String iban;
     @Enumerated(EnumType.STRING)
     private AccountTypeConstant accountType;

@@ -4,9 +4,11 @@ spring:
   h2:
     console.enabled: true
   datasource:
-    url: jdbc:h2:mem:mydb
-    username: accounts
-    password: 12345
-    driverClassName: org.h2.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/account
+    username: account
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.MySQL8Dialect
