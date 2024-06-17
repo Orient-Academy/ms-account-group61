@@ -81,7 +81,7 @@ public class AccountService {
             throw new NoChangeInUpdatedAccountException(ExceptionMessageConstant.NO_CHANGE_IN_UPDATED_ACCOUNT.getMessage());
         }
         Account savedAccount = accountRepository.save(updatedAccount);
-        redisTemplate.opsForValue().getAndDelete(Long.valueOf(accountDto.getId()));
+        redisTemplate.opsForValue().getAndDelete(accountDto.getId());
         return AccountMapper.INSTANCE.mapAccount(savedAccount);
     }
 
@@ -90,14 +90,14 @@ public class AccountService {
         accountRepository.deleteById(id);
     }
 
-    public AccountDto addIncome(Integer accountId, Double amount) {
+    public AccountDto addIncome(long accountId, Double amount) {
         Account account = getById(accountId);
         account.setBalance(account.getBalance() + amount);
         Account updatedAccount = accountRepository.save(account);
         return AccountMapper.INSTANCE.mapAccount(updatedAccount);
     }
 
-    public AccountDto addExpenditure(Integer accountId, Double amount) {
+    public AccountDto addExpenditure(long accountId, Double amount) {
         Account account = getById(accountId);
         if (account.getBalance() < amount) {
             throw new InsufficientBalanceException(ExceptionMessageConstant.INSUFFICIENT_BALANCE.getMessage());

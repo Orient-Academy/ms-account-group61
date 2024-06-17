@@ -59,7 +59,7 @@ public class AccountController {
     }
 
     @PutMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccountDto> updateAccount(@PathVariable @NonNull Integer id, @RequestBody AccountDto accountDto) {
+    public ResponseEntity<AccountDto> updateAccount(@PathVariable @NonNull long id, @RequestBody AccountDto accountDto) {
         accountDto.setId(id);
         AccountDto updatedAccount = accountService.updateAccount(accountDto);
         return new ResponseEntity<>(updatedAccount, HttpStatus.OK);

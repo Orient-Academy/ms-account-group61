@@ -14,7 +14,7 @@ import java.util.Date;
 @Data
 @Builder
 public class AccountDto implements Cloneable, Serializable {
-    private Integer id;
+    private Long id;
     private String iban;
     @Enumerated(EnumType.STRING)
     private AccountTypeConstant accountType;
