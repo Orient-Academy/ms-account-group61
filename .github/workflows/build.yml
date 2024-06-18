@@ -37,6 +37,11 @@ jobs:
           skip_check_run: false
           minimum_coverage: 70
           fail_below_threshold: true
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@<action version> # Ex: v2.1.0, See the latest version at https://github.com/marketplace/actions/sonarcloud-scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
