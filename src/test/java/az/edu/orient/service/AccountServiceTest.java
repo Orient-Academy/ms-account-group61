@@ -14,6 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AccountServiceTest {
@@ -32,12 +35,15 @@ class AccountServiceTest {
     @Mock
     AccountRepository accountRepository;
 
+    @Mock
+    RedisTemplate<Long, AccountDto> redisTemplate;
+
     @Test
     void getAllAccountsExpectReturnAccountDtoList() {
         // setup
         List<Account> accountList = new ArrayList<>();
         Account account = Account.builder()
-                .id(1)
+                .id(1L)
                 .accountNumber("323245464")
                 .balance(42500.5)
                 .currency(CurrencyConstant.AZN)
@@ -46,7 +52,7 @@ class AccountServiceTest {
                 .activeStatus(ActiveStatusConstant.ACTIVE.getValue())
                 .build();
         accountList.add(account);
-        Mockito.when(accountRepository.findAll()).thenReturn(accountList);
+        when(accountRepository.findAll()).thenReturn(accountList);
         // when
         List<AccountDto> accountDtoList = accountService.getAllAccounts();
         // then
@@ -57,8 +63,11 @@ class AccountServiceTest {
     @Test
     void getAccountByIdGivenIncorrectIdExpectThrowsAccountNotFoundException() {
         // setup
-        int givenId = -1;
-        Mockito.when(accountRepository.findById(givenId)).thenReturn(Optional.empty());
+        long givenId = -1L;
+        ValueOperations<Long, AccountDto> accountDtoValueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(accountDtoValueOperations);
+        when(accountDtoValueOperations.get(givenId)).thenReturn(null);
+        when(accountRepository.findById(givenId)).thenReturn(Optional.empty());
         // when
         AccountNotFoundException ex = assertThrows(AccountNotFoundException.class, () -> accountService.getAccountById(givenId));
         // then
@@ -69,9 +78,9 @@ class AccountServiceTest {
     @Test
     void getAccountByIdGivenCorrectIdExpectReturnsAccountDto() {
         // setup
-        int givenId = 1;
+        long givenId = 1;
         Account account = Account.builder()
-                .id(1)
+                .id(1L)
                 .accountNumber("323245464")
                 .balance(42500.5)
                 .currency(CurrencyConstant.AZN)
@@ -79,7 +88,10 @@ class AccountServiceTest {
                 .openingDate(new Date())
                 .activeStatus(ActiveStatusConstant.ACTIVE.getValue())
                 .build();
-        Mockito.when(accountRepository.findById(givenId)).thenReturn(Optional.of(account));
+        when(accountRepository.findById(givenId)).thenReturn(Optional.of(account));
+        ValueOperations<Long, AccountDto> accountDtoValueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(accountDtoValueOperations);
+        when(accountDtoValueOperations.get(givenId)).thenReturn(null);
         // when
         AccountDto accountDto = accountService.getAccountById(givenId);
         // then
@@ -93,7 +105,7 @@ class AccountServiceTest {
         AccountTypeConstant accountType = AccountTypeConstant.SAVINGS;
         List<Account> accountList = new ArrayList<>();
         Account account = Account.builder()
-                .id(1)
+                .id(1L)
                 .accountNumber("323245464")
                 .balance(42500.5)
                 .currency(CurrencyConstant.AZN)
@@ -102,7 +114,7 @@ class AccountServiceTest {
                 .activeStatus(ActiveStatusConstant.ACTIVE.getValue())
                 .build();
         accountList.add(account);
-        Mockito.when(accountRepository.findAllByAccountType(accountType)).thenReturn(accountList);
+        when(accountRepository.findAllByAccountType(accountType)).thenReturn(accountList);
         // when
         List<AccountDto> accountDtoList = accountService.getAccountsByAccountType(accountType);
         // then
@@ -115,7 +127,7 @@ class AccountServiceTest {
     void createAccountGivenAccountDtoExpectReturnAccountDto() {
         // setup
         AccountDto accountDto = AccountDto.builder()
-                .id(1)
+                .id(1L)
                 .accountNumber("323245464")
                 .balance(42500.5)
                 .currency(CurrencyConstant.AZN)
@@ -126,7 +138,7 @@ class AccountServiceTest {
 
         // Convert AccountDto to Account
         Account account = Account.builder()
-                .id(accountDto.getId())
+                .id(1L)
                 .accountNumber(accountDto.getAccountNumber())
                 .balance(accountDto.getBalance())
                 .currency(accountDto.getCurrency())
@@ -135,7 +147,7 @@ class AccountServiceTest {
                 .activeStatus(accountDto.getActiveStatus().getValue())
                 .build();
 
-        Mockito.when(accountRepository.save(account)).thenReturn(account);
+        when(accountRepository.save(account)).thenReturn(account);
 
         // when
         AccountDto createdAccountDto = accountService.createAccount(accountDto);
@@ -150,7 +162,7 @@ class AccountServiceTest {
     void updateAccountGivenNoUpdateInDtoExpectThrowNoUpdateInUpdatedAccountException() {
         // setup
         AccountDto accountDto = AccountDto.builder()
-                .id(1)
+                .id(1L)
                 .accountNumber("323245464")
                 .balance(42500.5)
                 .currency(CurrencyConstant.AZN)
@@ -169,7 +181,7 @@ class AccountServiceTest {
                 .activeStatus(accountDto.getActiveStatus().getValue())
                 .build();
 
-        Mockito.when(accountRepository.findById(accountDto.getId())).thenReturn(Optional.of(currentAccount));
+        when(accountRepository.findById(accountDto.getId())).thenReturn(Optional.of(currentAccount));
 
         // when & then
         NoChangeInUpdatedAccountException ex = assertThrows(NoChangeInUpdatedAccountException.class, () -> accountService.updateAccount(accountDto));
@@ -181,8 +193,10 @@ class AccountServiceTest {
     @Test
     void updateAccountGivenCorrectAccountDtoExpectReturnAccountDto() {
         // setup
+        ValueOperations<Long, AccountDto> accountDtoValueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(accountDtoValueOperations);
         AccountDto accountDto = AccountDto.builder()
-                .id(1)
+                .id(1L)
                 .accountNumber("323245464")
                 .balance(42500.5)
                 .currency(CurrencyConstant.AZN)
@@ -190,9 +204,10 @@ class AccountServiceTest {
                 .openingDate(new Date())
                 .activeStatus(ActiveStatusConstant.ACTIVE)
                 .build();
+        when(accountDtoValueOperations.getAndDelete(1L)).thenReturn(accountDto);
 
         Account currentAccount = Account.builder()
-                .id(1)
+                .id(1L)
                 .accountNumber("777325362")
                 .balance(35000.0)
                 .currency(CurrencyConstant.AZN)
@@ -211,8 +226,8 @@ class AccountServiceTest {
                 .activeStatus(accountDto.getActiveStatus().getValue())
                 .build();
 
-        Mockito.when(accountRepository.findById(accountDto.getId())).thenReturn(Optional.of(currentAccount));
-        Mockito.when(accountRepository.save(updatedAccount)).thenReturn(updatedAccount);
+        when(accountRepository.findById(accountDto.getId())).thenReturn(Optional.of(currentAccount));
+        when(accountRepository.save(updatedAccount)).thenReturn(updatedAccount);
 
         // when
         AccountDto updatedAccountDto = accountService.updateAccount(accountDto);
@@ -226,20 +241,20 @@ class AccountServiceTest {
     @Test
     void deleteAccountGivenCorrectIdExpectReturnAccountDto() {
         // setup
-        int givenId = 1;
+        long givenId = 1L;
         Account account = Account.builder().id(givenId).build();
-        Mockito.when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
+        when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
         // when
         accountService.deleteAccount(account.getId());
         // then
-        Mockito.verify(accountRepository, Mockito.times(1)).deleteById(account.getId());
+        verify(accountRepository, times(1)).deleteById(account.getId());
     }
 
     @Test
     void deleteAccountGivenIncorrectIdExpectThrowAccountNotFoundException() {
         // setup
-        int givenId = -1;
-        Mockito.when(accountRepository.findById(givenId)).thenReturn(Optional.empty());
+        long givenId = -1L;
+        when(accountRepository.findById(givenId)).thenReturn(Optional.empty());
 
         // when & then
         AccountNotFoundException ex = assertThrows(AccountNotFoundException.class, () -> accountService.deleteAccount(givenId));
@@ -251,11 +266,11 @@ class AccountServiceTest {
     @Test
     void addIncomeGivenCorrectIdAndCorrectAmountExpectReturnAccountDto() {
         // setup
-        int givenId = 1;
+        long givenId = 1;
         double firstBalance = 300;
         double givenAmount = 150;
         Account currentAccount = Account.builder()
-                .id(1)
+                .id(givenId)
                 .accountNumber("12345678")
                 .balance(firstBalance)
                 .currency(CurrencyConstant.AZN)
@@ -272,8 +287,8 @@ class AccountServiceTest {
                 .openingDate(currentAccount.getOpeningDate())
                 .activeStatus(currentAccount.getActiveStatus())
                 .build();
-        Mockito.when(accountRepository.findById(givenId)).thenReturn(Optional.of(currentAccount));
-        Mockito.when(accountRepository.save(Mockito.any(Account.class))).thenReturn(updatedAccount);
+        when(accountRepository.findById(givenId)).thenReturn(Optional.of(currentAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(updatedAccount);
         // when
         AccountDto updatedAccountDto = accountService.addIncome(givenId, givenAmount);
         // then
@@ -285,9 +300,9 @@ class AccountServiceTest {
     @Test
     void addIncomeGivenIncorrectIdAndCorrectAmountExpectThrowAccountNotFoundException() {
         // setup
-        int givenId = 1;
+        long givenId = 1L;
         double givenAmount = 150;
-        Mockito.when(accountRepository.findById(givenId)).thenReturn(Optional.empty());
+        when(accountRepository.findById(givenId)).thenReturn(Optional.empty());
 
         // when & then
         AccountException ex = assertThrows(AccountNotFoundException.class, () -> accountService.addIncome(givenId, givenAmount));
@@ -299,9 +314,9 @@ class AccountServiceTest {
     @Test
     void addExpenditureGivenIncorrectIdAndCorrectAmountExpectThrowAccountNotFoundException() {
         // setup
-        int accountId = -1;
+        long accountId = -1;
         double expenditureAmount = 250;
-        Mockito.when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 
         // when & then
         AccountException ex = assertThrows(AccountNotFoundException.class, () -> accountService.addExpenditure(accountId, expenditureAmount));
@@ -313,7 +328,7 @@ class AccountServiceTest {
     @Test
     void addExpenditureGivenCorrectIdAndIncorrectAmountExpectThrowInsufficientBalanceException() {
         // setup
-        int accountId = 1;
+        long accountId = 1L;
         double firstBalance = 300;
         double expenditureAmount = 350;
         Account currentAccount = Account.builder()
@@ -325,7 +340,7 @@ class AccountServiceTest {
                 .openingDate(new Date())
                 .activeStatus(ActiveStatusConstant.ACTIVE.getValue())
                 .build();
-        Mockito.when(accountRepository.findById(accountId)).thenReturn(Optional.of(currentAccount));
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(currentAccount));
 
         // when & then
         InsufficientBalanceException ex = assertThrows(InsufficientBalanceException.class, () -> accountService.addExpenditure(accountId, expenditureAmount));
@@ -337,7 +352,7 @@ class AccountServiceTest {
     @Test
     void addExpenditureGivenCorrectIdAndCorrectAmountExpectThrowInsufficientBalanceException() {
         // setup
-        int accountId = 1;
+        long accountId = 1;
         double firstBalance = 300;
         double expenditureAmount = 250;
         Account currentAccount = Account.builder()
@@ -358,8 +373,8 @@ class AccountServiceTest {
                 .openingDate(currentAccount.getOpeningDate())
                 .activeStatus(currentAccount.getActiveStatus())
                 .build();
-        Mockito.when(accountRepository.findById(accountId)).thenReturn(Optional.of(currentAccount));
-        Mockito.when(accountRepository.save(updatedAccount)).thenReturn(updatedAccount);
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(currentAccount));
+        when(accountRepository.save(updatedAccount)).thenReturn(updatedAccount);
         // when
         AccountDto accountDto = accountService.addExpenditure(accountId, expenditureAmount);
         // then

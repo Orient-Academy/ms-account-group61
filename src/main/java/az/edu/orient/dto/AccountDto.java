@@ -8,12 +8,13 @@ import jakarta.persistence.Enumerated;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @Builder
-public class AccountDto implements Cloneable{
-    private Integer id;
+public class AccountDto implements Cloneable, Serializable {
+    private Long id;
     private String iban;
     @Enumerated(EnumType.STRING)
     private AccountTypeConstant accountType;

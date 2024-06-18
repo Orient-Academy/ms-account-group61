@@ -59,7 +59,7 @@ public class AccountController {
     }
 
     @PutMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccountDto> updateAccount(@PathVariable @NonNull Integer id, @RequestBody AccountDto accountDto) {
+    public ResponseEntity<AccountDto> updateAccount(@PathVariable @NonNull long id, @RequestBody AccountDto accountDto) {
         accountDto.setId(id);
         AccountDto updatedAccount = accountService.updateAccount(accountDto);
         return new ResponseEntity<>(updatedAccount, HttpStatus.OK);
@@ -80,6 +80,12 @@ public class AccountController {
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteAccount(@PathVariable Integer id) {
         accountService.deleteAccount(id);
+        return new ResponseEntity<>("Deleted successfully!", HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "/{id}/test", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> deleteAccount2(@PathVariable Integer id) {
+        System.out.println("Hello");
         return new ResponseEntity<>("Deleted successfully!", HttpStatus.OK);
     }
 }
