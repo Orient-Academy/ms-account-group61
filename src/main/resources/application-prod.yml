@@ -1,18 +1,18 @@
 server:
-  port: 8081
+  port: 8080
 spring:
   h2:
     console.enabled: true
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/account
+    url: jdbc:mysql://mysql-service:3306/account
     username: account
-    password: 123456
+    password: account12345
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     database-platform: org.hibernate.dialect.MySQL8Dialect
 
 redis:
-  host: localhost
+  host: redis-service
   port: 6379
