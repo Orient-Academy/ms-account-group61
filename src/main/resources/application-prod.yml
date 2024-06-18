@@ -4,7 +4,7 @@ spring:
   h2:
     console.enabled: true
   datasource:
-    url: jdbc:mysql://mysql-service:3306/account
+    url: jdbc:mysql://account.c5g42usswain.us-east-2.rds.amazonaws.com:3306/account
     username: account
     password: account12345
     driver-class-name: com.mysql.cj.jdbc.Driver
