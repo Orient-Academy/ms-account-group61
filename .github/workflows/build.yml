@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+permissions: write-all
 jobs:
   Build-and-test:
     runs-on: ubuntu-latest
@@ -36,7 +37,7 @@ jobs:
           skip_check_run: false
           minimum_coverage: 70
           fail_below_threshold: true
-
+          
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
