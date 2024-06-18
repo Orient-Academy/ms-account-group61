@@ -15,9 +15,5 @@ spec:
       containers:
         - name: ms-account-group61
           image: 057196872298.dkr.ecr.us-east-2.amazonaws.com/ms-account-group61:latest
-          resources:
-            limits:
-              memory: "128Mi"
-              cpu: "200m"
           ports:
             - containerPort: 8080
